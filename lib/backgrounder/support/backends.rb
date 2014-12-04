@@ -16,15 +16,15 @@ module CarrierWave
             @backend = queue_name
           end
 
-          def enqueue_for_backend(worker, class_name, subject_id, mounted_as)
-            self.send :"enqueue_#{backend}", worker, class_name, subject_id, mounted_as
+          def enqueue_for_backend(worker, class_name, subject_id, mounted_as, priority)
+            self.send :"enqueue_#{backend}", worker, class_name, subject_id, mounted_as, priority
           end
 
           private
 
           def enqueue_delayed_job(worker, *args)
             if ::Delayed::Job.new.respond_to?(:queue)
-              ::Delayed::Job.enqueue worker.new(*args), :queue => queue_options[:queue]
+              ::Delayed::Job.enqueue worker.new(*args), :queue => queue_options[:queue], :priority => args.last.to_i
             else
               ::Delayed::Job.enqueue worker.new(*args)
               if queue_options[:queue]
